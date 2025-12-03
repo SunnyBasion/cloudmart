@@ -47,7 +47,7 @@ jobs:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
           name: ${{ env.AZURE_CONTAINER_GROUP }}
           image: ${{ env.DOCKER_IMAGE_NAME }}:latest
-          dns-name-label: cloudmart-${{ github.run_number }}
+          dns-name-label: cloudmart
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1.5
