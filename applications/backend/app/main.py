@@ -33,18 +33,16 @@ def health():
 # -------------------------
 # PRODUCT API ENDPOINTS
 # -------------------------
-
-@app.get("/api/v1/seed")
-def seed():
-    seed_products()
-    return {"message": "Sample products seeded!"}
-
-
-@app.get("/api/v1/products")
-def get_products():
+@app.get("/api/v1/products/{id}")
+def get_product(id: str):
+    query = f"SELECT * FROM c WHERE c.id = '{id}'"
     items = list(product_container.query_items(
-        query="SELECT * FROM c",
+        query=query,
         enable_cross_partition_query=True
     ))
-    return items
+    
+    if not items:
+        return {"detail": "Product not found"}
+
+    return items[0]
 
