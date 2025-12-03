@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query, Body
 from uuid import uuid4
+from fastapi.middleware.cors import CORSMiddleware  # <-- NEW!
 
 from .database import (
     database,
@@ -10,6 +11,14 @@ from .database import (
 
 app = FastAPI(title="CloudMart API", version="1.0.0")
 
+# 🌍 Allow frontend to access backend (CORS FIX!)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 🔓 For lab: allow all. Can restrict later.
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -------------------------
 # ROOT + HEALTH
