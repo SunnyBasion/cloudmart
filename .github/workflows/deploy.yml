@@ -8,8 +8,6 @@ on:
 env:
   AZURE_RESOURCE_GROUP: Student-RG-1879876
   AZURE_REGION: canadaeast
-  AZURE_CONTAINER_GROUP: cloudmart-app
-  AZURE_CONTAINER_NAME: cloudmart-api
   DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-api
 
 jobs:
@@ -26,6 +24,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # -----------------------
+      # BACKEND DEPLOYMENT
+      # -----------------------
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -41,11 +42,11 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy container to Azure Container Instances
+      - name: Deploy backend to Azure Container Instances
         uses: azure/aci-deploy@v1
         with:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          name: ${{ env.AZURE_CONTAINER_GROUP }}
+          name: cloudmart-backend
           image: ${{ env.DOCKER_IMAGE_NAME }}:latest
           dns-name-label: cloudmart
           location: ${{ env.AZURE_REGION }}
@@ -55,4 +56,29 @@ jobs:
           environment-variables: |
             COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }}
             COSMOS_KEY=${{ secrets.COSMOS_KEY }}
+
+      # -----------------------
+      # FRONTEND DEPLOYMENT
+      # -----------------------
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./applications/frontend
+          file: ./applications/frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:${{ github.sha }}
+
+      - name: Deploy frontend to Azure Container Instances
+        uses: azure/aci-deploy@v1
+        with:
+          resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+          name: cloudmart-frontend
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:latest
+          dns-name-label: cloudmart-ui-${{ github.run_number }}
+          location: ${{ env.AZURE_REGION }}
+          cpu: 1
+          memory: 1
+          ports: 80
 
