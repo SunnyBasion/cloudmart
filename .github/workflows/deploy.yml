@@ -9,7 +9,7 @@ env:
   AZURE_RESOURCE_GROUP: Student-RG-1879876
   AZURE_REGION: canadaeast
   BACKEND_CONTAINER_GROUP: cloudmart-backend
-  FRONTEND_CONTAINER_GROUP: cloudmart-frontend
+  FRONTEND_CONTAINER_GROUP: cloudmart-frontend-${{ github.run_number }}
   DOCKER_BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-api
   DOCKER_FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend
 
@@ -52,7 +52,7 @@ jobs:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
           name: ${{ env.BACKEND_CONTAINER_GROUP }}
           image: ${{ env.DOCKER_BACKEND_IMAGE }}:latest
-          dns-name-label: cloudmart-backend
+          dns-name-label: cloudmart-backend-${{ github.run_number }}
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1.5
@@ -84,4 +84,8 @@ jobs:
           cpu: 1
           memory: 1
           ports: 80
+          ip-address: Public
+          os-type: Linux
+          protocol: TCP
+          restart-policy: Always
 
