@@ -16,7 +16,6 @@ def health():
     Simple health check that also reports Cosmos DB status.
     """
     try:
-        # Try listing containers to confirm DB connectivity
         list(database.list_containers())
         db_status = "connected"
     except Exception:
@@ -33,6 +32,17 @@ def health():
 # -------------------------
 # PRODUCT API ENDPOINTS
 # -------------------------
+
+@app.get("/api/v1/products")
+def get_products():
+    query = "SELECT * FROM c"
+    items = list(product_container.query_items(
+        query=query,
+        enable_cross_partition_query=True
+    ))
+    return items
+
+
 @app.get("/api/v1/products/{id}")
 def get_product(id: str):
     query = f"SELECT * FROM c WHERE c.id = '{id}'"
@@ -40,7 +50,7 @@ def get_product(id: str):
         query=query,
         enable_cross_partition_query=True
     ))
-    
+
     if not items:
         return {"detail": "Product not found"}
 
