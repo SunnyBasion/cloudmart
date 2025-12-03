@@ -1,0 +1,57 @@
+name: Deploy CloudMart API to Azure
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: Student-RG-1879876
+  AZURE_CONTAINER_NAME: cloudmart-api
+  AZURE_LOCATION: canadaeast
+  DOCKER_IMAGE: mbasion/cloudmart-api:latest
+  DNS_LABEL: cloudmart-1879876
+
+jobs:
+  deploy-to-azure:
+    name: Deploy to Azure Container Instances
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete existing container (if exists)
+        run: |
+          az container delete \
+            --name $AZURE_CONTAINER_NAME \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --yes || true
+
+      - name: Deploy container from Docker Hub
+        run: |
+          az container create \
+            --name $AZURE_CONTAINER_NAME \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --image $DOCKER_IMAGE \
+            --dns-name-label $DNS_LABEL \
+            --location $AZURE_LOCATION \
+            --ports 80 \
+            --os-type Linux \
+            --environment-variables \
+              COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }} \
+              COSMOS_KEY=${{ secrets.COSMOS_KEY }}
+
+      - name: Show container status
+        run: |
+          az container show \
+            --name $AZURE_CONTAINER_NAME \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --query "{state:instanceView.state, fqdn:ipAddress.fqdn}" \
+            -o table
+
