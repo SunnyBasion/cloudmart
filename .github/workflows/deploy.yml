@@ -8,7 +8,10 @@ on:
 env:
   AZURE_RESOURCE_GROUP: Student-RG-1879876
   AZURE_REGION: canadaeast
-  DOCKER_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-api
+  BACKEND_CONTAINER_GROUP: cloudmart-backend
+  FRONTEND_CONTAINER_GROUP: cloudmart-frontend
+  DOCKER_BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-api
+  DOCKER_FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend
 
 jobs:
   build-push-deploy:
@@ -18,15 +21,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # LOGIN TO DOCKER HUB
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # -----------------------
-      # BACKEND DEPLOYMENT
-      # -----------------------
+      # BACKEND: BUILD + PUSH
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -34,21 +36,23 @@ jobs:
           file: ./applications/backend/Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.DOCKER_BACKEND_IMAGE }}:latest
+            ${{ env.DOCKER_BACKEND_IMAGE }}:${{ github.sha }}
 
+      # LOGIN TO AZURE
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # BACKEND: DEPLOY TO ACI
       - name: Deploy backend to Azure Container Instances
         uses: azure/aci-deploy@v1
         with:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          name: cloudmart-backend
-          image: ${{ env.DOCKER_IMAGE_NAME }}:latest
-          dns-name-label: cloudmart
+          name: ${{ env.BACKEND_CONTAINER_GROUP }}
+          image: ${{ env.DOCKER_BACKEND_IMAGE }}:latest
+          dns-name-label: cloudmart-backend-${{ github.run_number }}
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1.5
@@ -57,9 +61,7 @@ jobs:
             COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }}
             COSMOS_KEY=${{ secrets.COSMOS_KEY }}
 
-      # -----------------------
-      # FRONTEND DEPLOYMENT
-      # -----------------------
+      # FRONTEND: BUILD + PUSH
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
@@ -67,16 +69,17 @@ jobs:
           file: ./applications/frontend/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:${{ github.sha }}
+            ${{ env.DOCKER_FRONTEND_IMAGE }}:latest
+            ${{ env.DOCKER_FRONTEND_IMAGE }}:${{ github.sha }}
 
+      # FRONTEND: DEPLOY TO ACI
       - name: Deploy frontend to Azure Container Instances
         uses: azure/aci-deploy@v1
         with:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          name: cloudmart-frontend
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend:latest
-          dns-name-label: cloudmart-ui-${{ github.run_number }}
+          name: ${{ env.FRONTEND_CONTAINER_GROUP }}
+          image: ${{ env.DOCKER_FRONTEND_IMAGE }}:latest
+          dns-name-label: cloudmart-frontend-${{ github.run_number }}
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1
