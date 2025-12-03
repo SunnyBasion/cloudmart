@@ -160,3 +160,11 @@ def get_orders():
     ))
     return items
 
+@app.delete("/api/v1/orders/{id}")
+def delete_order(id: str):
+    try:
+        orders_container.delete_item(item=id, partition_key=USER_ID)
+        return {"message": "Order deleted"}
+    except Exception:
+        raise HTTPException(status_code=404, detail="Order not found")
+
