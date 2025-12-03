@@ -49,6 +49,8 @@ jobs:
           image: ${{ env.DOCKER_IMAGE_NAME }}:latest
           dns-name-label: cloudmart-${{ github.run_number }}
           location: ${{ env.AZURE_REGION }}
+          cpu: 1
+          memory: 1.5
           ports: 80
           environment-variables: |
             COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }}
