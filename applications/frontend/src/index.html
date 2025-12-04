@@ -13,14 +13,33 @@
             border-radius:8px;
             box-shadow:0 2px 5px rgba(0,0,0,0.1);
         }
+        button {
+            margin-right:10px;
+            padding:6px 15px;
+            border:none;
+            background:#007bff;
+            color:white;
+            border-radius:5px;
+            cursor:pointer;
+        }
+        button:hover {
+            background:#005bb5;
+        }
     </style>
 </head>
 <body>
     <h1>🛒 CloudMart</h1>
 
-    <!-- 👉 Added Cart Link 👇 -->
+    <!-- 👉 Cart Link -->
     <a href="/cart.html" style="font-size:18px; text-decoration:none;">View Cart 🛍️</a>
     <br><br>
+
+    <!-- 👉 Category Filter Buttons -->
+    <div style="margin-bottom: 15px;">
+        <button onclick="loadProducts()">All</button>
+        <button onclick="loadProducts('electronics')">Electronics</button>
+        <button onclick="loadProducts('clothing')">Clothing</button>
+    </div>
 
     <div id="products">Loading products...</div>
 
