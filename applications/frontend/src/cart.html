@@ -33,41 +33,45 @@
 <button onclick="placeOrder()">Confirm Order</button>
 
 <script>
-  function loadCart() {
-    fetch("/api/v1/cart")
-      .then(r => r.json())
-      .then(items => {
-        const container = document.getElementById("cart");
-        let total = 0;
+  async function loadCart() {
+    const res = await fetch("/api/v1/cart");
+    const items = await res.json();
 
-        if (items.length === 0) {
-          container.innerHTML = "<p>Your cart is empty!</p>";
-          document.getElementById("total").innerText = "";
-          return;
-        }
+    const container = document.getElementById("cart");
+    container.innerHTML = "";
 
-        container.innerHTML = items.map(i => {
-          total += (i.quantity || 1);
-          return `<div class="item">
-                    <p><strong>Product:</strong> ${i.product_id}</p>
-                    <p><strong>Quantity:</strong> ${i.quantity}</p>
-                  </div>`;
-        }).join("");
+    if (items.length === 0) {
+      container.innerHTML = "<p>Your cart is empty!</p>";
+      document.getElementById("total").innerText = "";
+      return;
+    }
 
-        document.getElementById("total").innerText = "Total items: " + total;
-      });
+    let totalCost = 0;
+
+    for (const item of items) {
+      const productResponse = await fetch(`/api/v1/products/${item.product_id}`);
+      const product = await productResponse.json();
+
+      totalCost += product.price * item.quantity;
+
+      container.innerHTML += `
+        <div class="item">
+          <strong>${product.name}</strong><br>
+          Price: $${product.price.toFixed(2)}<br>
+          Quantity: ${item.quantity}
+        </div>
+      `;
+    }
+
+    document.getElementById("total").innerText =
+      "Total Cost: $" + totalCost.toFixed(2);
   }
 
-  function placeOrder() {
-    fetch("/api/v1/orders", { method: "POST" })
-      .then(r => r.json())
-      .then(order => {
-        alert("Order Confirmed! Order ID: " + order.id);
-        loadCart(); // Refresh UI after placing order
-      });
+  async function placeOrder() {
+    alert("Order confirmed! (mock submission)");
   }
 
-  loadCart();
+  document.addEventListener("DOMContentLoaded", loadCart);
 </script>
 
 </body>
