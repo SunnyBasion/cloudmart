@@ -1,7 +1,8 @@
 # Submission.md  
+**Student Name:** Sunny Basion
 **Student ID:** 107827172  
 **Course Code:** CSP451NIA  
-**Project:** CloudMart – Azure CI/CD Deployment
+**Project:** CSP451 Milestone 3: Enterprise Cloud Solution
 
 ---
 
