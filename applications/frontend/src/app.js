@@ -1,9 +1,21 @@
-async function loadProducts() {
-    const response = await fetch("/api/v1/products");
+async function loadProducts(category = "") {
+    const container = document.getElementById("products");
+    container.innerHTML = "Loading...";
+
+    let url = "/api/v1/products";
+    if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+    }
+
+    const response = await fetch(url);
     const products = await response.json();
 
-    const container = document.getElementById("products");
     container.innerHTML = "";
+
+    if (!products.length) {
+        container.innerHTML = "<p>No products found.</p>";
+        return;
+    }
 
     products.forEach(p => {
         const item = document.createElement("div");
@@ -11,7 +23,7 @@ async function loadProducts() {
         item.innerHTML = `
             <h3>${p.name}</h3>
             <p>Category: ${p.category}</p>
-            <p>$${p.price}</p>
+            <p>$${p.price.toFixed(2)}</p>
             <button onclick="addToCart('${p.id}')">Add to Cart</button>
         `;
         container.appendChild(item);
@@ -27,5 +39,6 @@ async function addToCart(productId) {
     alert("Added to cart!");
 }
 
-document.addEventListener("DOMContentLoaded", loadProducts);
+// Initial load: show all
+document.addEventListener("DOMContentLoaded", () => loadProducts());
 
