@@ -23,7 +23,7 @@ and improving stability.
 |----------|------------|
 | Frontend | Vue.js running inside Docker |
 | Backend API | Node.js (REST, `/api/v1/products`) |
-| Reverse Proxy | NGINX (CORS handling removed) |
+| Reverse Proxy | NGINX |
 | CI/CD | GitHub Actions → Docker Hub → Azure |
 | Region | Canada East |
 | Resource Group | Student-RG-1879876 |
