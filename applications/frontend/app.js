@@ -1,7 +1,5 @@
-const API_BASE = "http://cloudmart-backend.canadaeast.azurecontainer.io";
-
 async function loadProducts() {
-    const response = await fetch(`${API_BASE}/api/v1/products`);
+    const response = await fetch("/api/v1/products");
     const products = await response.json();
 
     const container = document.getElementById("products");
@@ -21,7 +19,7 @@ async function loadProducts() {
 }
 
 async function addToCart(productId) {
-    await fetch(`${API_BASE}/api/v1/cart/items`, {
+    await fetch("/api/v1/cart/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_id: productId, quantity: 1 })

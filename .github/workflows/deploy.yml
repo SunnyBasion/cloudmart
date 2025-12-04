@@ -9,7 +9,7 @@ env:
   AZURE_RESOURCE_GROUP: Student-RG-1879876
   AZURE_REGION: canadaeast
   BACKEND_CONTAINER_GROUP: cloudmart-backend
-  FRONTEND_CONTAINER_GROUP: cloudmart-frontend-${{ github.run_number }}
+  FRONTEND_CONTAINER_GROUP: cloudmart-frontend  # STATIC NOW
   DOCKER_BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-api
   DOCKER_FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/cloudmart-frontend
 
@@ -50,9 +50,9 @@ jobs:
         uses: azure/aci-deploy@v1
         with:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          name: ${{ env.BACKEND_CONTAINER_GROUP }}
+          name: ${{ env.BACKEND_CONTAINER_GROUP }}  # STATIC NAME
           image: ${{ env.DOCKER_BACKEND_IMAGE }}:latest
-          dns-name-label: cloudmart-backend-${{ github.run_number }}
+          dns-name-label: cloudmart-backend           # STATIC DNS LABEL
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1.5
@@ -61,7 +61,7 @@ jobs:
             COSMOS_ENDPOINT=${{ secrets.COSMOS_ENDPOINT }}
             COSMOS_KEY=${{ secrets.COSMOS_KEY }}
 
-      # FRONTEND: BUILD + PUSH
+      # FRONTEND: BUILD + PUSH (NGINX)
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
@@ -72,14 +72,14 @@ jobs:
             ${{ env.DOCKER_FRONTEND_IMAGE }}:latest
             ${{ env.DOCKER_FRONTEND_IMAGE }}:${{ github.sha }}
 
-      # FRONTEND: DEPLOY TO ACI
+      # FRONTEND: DEPLOY TO ACI WITH STATIC PUBLIC ENDPOINT
       - name: Deploy frontend to Azure Container Instances
         uses: azure/aci-deploy@v1
         with:
           resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          name: ${{ env.FRONTEND_CONTAINER_GROUP }}
+          name: ${{ env.FRONTEND_CONTAINER_GROUP }}  # STATIC NAME
           image: ${{ env.DOCKER_FRONTEND_IMAGE }}:latest
-          dns-name-label: cloudmart-frontend-${{ github.run_number }}
+          dns-name-label: cloudmart                  # STABLE URL
           location: ${{ env.AZURE_REGION }}
           cpu: 1
           memory: 1

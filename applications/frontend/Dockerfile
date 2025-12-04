@@ -1,12 +1,11 @@
-FROM nginx:alpine
+FROM nginx:latest
 
-# Set working directory
-WORKDIR /usr/share/nginx/html
+# Copy static frontend files
+COPY index.html /usr/share/nginx/html/
+COPY app.js /usr/share/nginx/html/
 
-# Copy frontend files
-COPY index.html .
-COPY app.js .
+# Copy nginx reverse proxy configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80 for Azure
 EXPOSE 80
 
