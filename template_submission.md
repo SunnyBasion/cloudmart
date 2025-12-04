@@ -11,9 +11,7 @@ The CloudMart application is a containerized full-stack deployment running on
 Azure Container Instances (ACI) and integrated into a continuous
 deployment pipeline using GitHub Actions and Docker Hub.
 
-Originally troubleshooting CORS issues between frontend and backend,
-the solution shifted to using an **NGINX reverse proxy**, simplifying communication
-and improving stability.
+To simplify communication and improve stability, the solution uses an NGINX reverse proxy between the frontend and backend, ensuring smooth integration.
 
 ---
 
